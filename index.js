@@ -5,12 +5,14 @@ var bodyParser = require('body-parser')
 var Schema = mongoose.Schema
 
 const User = require('./models/user')
-const QA = require('./models/qa')
+const Question = require('./models/question')
+const Answer = require('./models/answer')
 const QASession = require('./models/session')
 
 var app = express()
 
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 //app.use(app.router);
 
 //Set up default mongoose connection
@@ -68,7 +70,6 @@ app.post('/qa', function(req, res){
 })
 
 app.get('/qa/:qa_id/questions', function(req, res){
-    console.log(req.params.qa_id)
     QASession.findById({_id: req.params.qa_id})
         .exec()
         .then(doc => {
@@ -80,3 +81,26 @@ app.get('/qa/:qa_id/questions', function(req, res){
             res.status(500).json({error: err})
         })
 })
+
+app.post('/answer/:question_id', function(req, res){
+    const question_id = req.params.question_id
+    const user_answer = req.body.user_answer
+    console.log(user_answer)
+    const answer = new Answer({
+        _id: new mongoose.Types.ObjectId(),
+        host_id : req.host_id,
+        question_id : question_id,
+        answered_by : "test user",
+        text : req.text,
+        image_url : req.body.image_url
+    })
+    answer.save().then(result =>{
+        console.log(result)
+    })
+    .catch(err=> console.log(err))
+    res.status(201).json({
+        message: "Handling POST requests to /question",
+        createdAnswer : answer,
+    })
+})
+
