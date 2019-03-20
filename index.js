@@ -69,6 +69,23 @@ app.post('/qa', function(req, res){
      })
 })
 
+app.post('/question/:qa_id', function(req, res){
+    const question = new Question({
+        _id: new mongoose.Types.ObjectId(),
+        session_id : req.params.qa_id,
+        asked_by : req.body.asked_by,
+        text: req.body.text
+     })
+     question.save().then(result =>{
+         console.log(result)
+     })
+     .catch(err=> console.log(err))
+     res.status(201).json({
+         message: "Handling POST requests to /question",
+         createdQuestion : question,
+     })
+})
+
 app.get('/qa/:qa_id/questions', function(req, res){
     QASession.findById({_id: req.params.qa_id})
         .exec()
@@ -84,14 +101,12 @@ app.get('/qa/:qa_id/questions', function(req, res){
 
 app.post('/answer/:question_id', function(req, res){
     const question_id = req.params.question_id
-    const user_answer = req.body.user_answer
-    console.log(user_answer)
     const answer = new Answer({
         _id: new mongoose.Types.ObjectId(),
-        host_id : req.host_id,
+        host_id : req.body.host_id,
         question_id : question_id,
         answered_by : "test user",
-        text : req.text,
+        text : req.body.text,
         image_url : req.body.image_url
     })
     answer.save().then(result =>{
